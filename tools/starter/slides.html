@@ -1,0 +1,22 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     One <section> per slide, matched to ../outline.md by data-slide="NN".
+     Classes: dark | cream | void. "00 / 00" in the chrome band is rewritten
+     by the build. A span with class=ph marks something still to write; the
+     build lists every one. A canvas with data-viz=name is drawn by viz.js.
+     Every layout the theme has is shown in the harness's example deck:
+     ~/code/talk-harness/_src/slides.html
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<!-- 01 · COVER ───────────────────────────────────────────────────────────── -->
+<section class="slide void" data-slide="01">
+  <canvas class="fig-full" data-viz="drift" data-opt='{"quiver":true}' width="1920" height="1080" style="opacity:.34"></canvas>
+  <div class="scrim scrim-soft"></div>
+  <div style="position:absolute;left:var(--pad-x);right:var(--pad-x);top:300px;z-index:3">
+    <div class="kicker reveal"><span class="ph">venue · date</span></div>
+    <h1 class="reveal" style="margin-top:26px;max-width:1500px"><span class="ph">The title</span></h1>
+    <p class="lead reveal r-late" style="margin-top:40px;font-size:40px;color:var(--ink-cream-2);max-width:1300px"><span class="ph">One line under it</span></p>
+  </div>
+  <div class="credit" style="position:absolute;left:var(--pad-x);bottom:66px;z-index:3">
+    <span class="ph">Your name &middot; Your lab &middot; Date</span>
+  </div>
+</section>

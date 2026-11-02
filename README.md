@@ -20,7 +20,8 @@ Nothing is installed. There are no packages.
 
 ## Start a talk
 
-Copy the harness into a folder for the talk:
+By hand, copy the harness into a folder for the talk (or install the skill
+below and let Claude do this):
 
 ```
 git clone https://github.com/cmvcordova/talk-harness.git
@@ -40,6 +41,20 @@ It will ask about any answer you left blank, show you the outline, then
 build the deck, screenshot every slide, run the overflow check and export
 the PDF. From there you talk to it: "slide 4 is too dense", "the kicker on 7
 is wrong", "we lost two minutes, cut one slide".
+
+## Make it a skill
+
+So that "let's make a presentation" always lands here, link the skill into
+Claude Code's personal skills folder once:
+
+```
+ln -s ~/code/talk-harness/skill ~/.claude/skills/new-talk
+```
+
+From then on, in any folder, say "new talk for the lab meeting on the 20th"
+or type `/new-talk`. Claude clones or updates the harness, stamps the folder
+next to your other talks, fills the brief from what you said, asks only for
+what is still blank, and hands over to the folder's `CLAUDE.md`.
 
 ## What you get
 

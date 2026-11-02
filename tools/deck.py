@@ -137,8 +137,16 @@ def cmd_new(root, a):
             shutil.copytree(src, dest / name, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store"))
         else:
             shutil.copy(src, dest / name)
-    for junk in (dest / "shots",):
-        shutil.rmtree(junk, ignore_errors=True)
+    # the harness root is the example deck; a new talk starts with none of its content
+    starter = HERE / "starter"
+    shutil.copy(starter / "outline.md", dest / "outline.md")
+    shutil.copy(starter / "slides.html", dest / "_src" / "slides.html")
+    shutil.copy(starter / "deck.toml", dest / "deck.toml")
+    shutil.rmtree(dest / "sources", ignore_errors=True); (dest / "sources").mkdir()
+    shutil.copy(starter / "citations.json", dest / "sources" / "citations.json")
+    shutil.rmtree(dest / "assets", ignore_errors=True); (dest / "assets").mkdir()
+    (dest / "assets" / ".gitkeep").write_text("")
+    shutil.rmtree(dest / "tools" / "starter", ignore_errors=True)
     print(f"new talk folder: {dest}\n  1. answer brief.md\n  2. open Claude Code there and say: build my talk from brief.md")
 
 

@@ -1,0 +1,7 @@
+# One file per talk. build.py reads it; tools/deck.py reads it.
+title  = "TODO[title]"
+output = "talk.html"          # written next to this file
+lang   = "en"
+media  = "assets"             # images and video are linked from here; --embed-media inlines them
+limit  = "20:00"              # the build warns when the outline's times add up past this
+fonts  = "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap"
