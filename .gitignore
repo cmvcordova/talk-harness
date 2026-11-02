@@ -1,0 +1,7 @@
+# the PDF is regenerated with headless Chrome: python3 tools/deck.py pdf
+*.pdf
+# screenshots of every slide: python3 tools/deck.py shots
+shots/
+__pycache__/
+*.pyc
+.DS_Store
