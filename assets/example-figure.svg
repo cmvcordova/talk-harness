@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="560" viewBox="0 0 880 560" font-family="DM Mono, monospace">
+  <!-- An illustration, not data: a curve drawn by hand to show where a figure sits on a slide. -->
+  <rect width="880" height="560" fill="#1B241E"/>
+  <g stroke="rgba(240,232,210,.18)" stroke-width="1">
+    <line x1="90" y1="470" x2="840" y2="470"/>
+    <line x1="90" y1="60" x2="90" y2="470"/>
+    <line x1="90" y1="368" x2="840" y2="368" stroke-dasharray="4 8"/>
+    <line x1="90" y1="266" x2="840" y2="266" stroke-dasharray="4 8"/>
+    <line x1="90" y1="164" x2="840" y2="164" stroke-dasharray="4 8"/>
+  </g>
+  <path d="M110 440 C 260 430, 330 300, 420 250 S 640 130, 820 110" fill="none" stroke="#D4843E" stroke-width="4"/>
+  <g fill="#F0E8D2">
+    <circle cx="110" cy="440" r="7"/><circle cx="300" cy="372" r="7"/><circle cx="420" cy="250" r="7"/>
+    <circle cx="560" cy="190" r="7"/><circle cx="700" cy="134" r="7"/><circle cx="820" cy="110" r="7"/>
+  </g>
+  <g fill="rgba(240,232,210,.55)" font-size="17" letter-spacing="2">
+    <text x="90" y="505">DEPTH</text>
+    <text x="26" y="64" transform="rotate(-90 26 64)" text-anchor="end">SIGNAL</text>
+    <text x="840" y="520" text-anchor="end" fill="#D4843E">ILLUSTRATION · NOT DATA</text>
+  </g>
+</svg>

@@ -1,0 +1,11 @@
+{
+ "_note": "Every source a slide cites. build.py turns data-cite keys into footer links and fills __SOURCES_LIST__. Check each URL before the talk and write the date here.",
+ "frontend-slides": {
+  "label": "zarazhangrui/frontend-slides (MIT)",
+  "url": "https://github.com/zarazhangrui/frontend-slides"
+ },
+ "chrome-headless": {
+  "label": "Chrome headless mode, developer docs",
+  "url": "https://developer.chrome.com/docs/chromium/headless"
+ }
+}

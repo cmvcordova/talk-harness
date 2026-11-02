@@ -64,9 +64,12 @@ function arrowHead(ctx, x, y, ang, s){
 /* =========================================================================
    DRIFT — an ambient field for covers and closes. Points ride a slow,
    smooth flow made of three sine fields; they leave short trails.
+   With data-opt='{"quiver":true}' a lattice of arrows sweeps in from the
+   left at 1.6 s and shows the flow the points are riding.
    ========================================================================= */
 VIZ['drift'] = function(cv){
   const W = cv.width, H = cv.height, ctx = cv.getContext('2d');
+  const opt = JSON.parse(cv.dataset.opt || '{}');
   const rnd = mkRnd(20261102);
   const N = 600, P = new Float32Array(N*2);
   for(let i=0;i<N;i++){ P[i*2] = rnd(); P[i*2+1] = rnd(); }
@@ -98,6 +101,27 @@ VIZ['drift'] = function(cv){
         ctx.fillRect(x*W - 1.3, y*H - 1.3, 2.6, 2.6);
       }
       ctx.globalCompositeOperation = 'source-over';
+      if(opt.quiver){
+        const QX = 17, QY = 10, L = 46;
+        ctx.lineWidth = 2.2;
+        for(let qx=0; qx<QX; qx++){
+          const nx = (qx+.5)/QX;
+          const sweep = REDUCE ? 1 : clamp01((el - 1.6 - nx*.85)/.55);
+          if(sweep <= 0) continue;
+          for(let qy=0; qy<QY; qy++){
+            const ny = (qy+.5)/QY;
+            flow(nx, ny, t, OUT);
+            const mag = Math.hypot(OUT[0], OUT[1]) / .0016;
+            const ang = Math.atan2(OUT[1], OUT[0]);
+            const a = sweep * (.30 + .45*clamp01(mag)) * .9;
+            ctx.strokeStyle = ctx.fillStyle = rgba(C.paper, a);
+            const x0 = nx*W - Math.cos(ang)*L*.5, y0 = ny*H - Math.sin(ang)*L*.5;
+            const x1 = nx*W + Math.cos(ang)*L*.5, y1 = ny*H + Math.sin(ang)*L*.5;
+            ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+            arrowHead(ctx, x1, y1, ang, 12);
+          }
+        }
+      }
     }
   };
 };

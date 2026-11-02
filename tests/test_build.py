@@ -1,4 +1,4 @@
-import pathlib, shutil, sys, tempfile, unittest
+import contextlib, io, pathlib, shutil, sys, tempfile, unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "_src"))
@@ -92,7 +92,8 @@ class Mini(unittest.TestCase):
         self.assertIn('<html lang="en">', r.html)
 
     def test_main_writes_output(self):
-        build.main(["--root", str(self.root)])
+        with contextlib.redirect_stdout(io.StringIO()):
+            build.main(["--root", str(self.root)])
         self.assertTrue((self.root / "mini.html").exists())
 
 

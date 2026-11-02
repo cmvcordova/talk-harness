@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A talk built with talk-harness</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=DM+Mono:wght@400;500&display=swap">
+<style>
+/* ===========================================================================
+   THEME — "Mat": deep forest ground, warm cream ink, one burnt-orange accent
+   used as punctuation, and a low wood glow from the bottom right.
+   Authored at the 1920x1080 stage size; the whole stage scales as one unit.
+
+   To re-skin a deck, change the tokens in :root and nothing else.
+   =========================================================================== */
+:root{
+  /* --- surface --- */
+  --bg-dark:#232E26;
+  --bg-dark-alt:#2E3D30;
+  --bg-cream:#EDE6D0;
+  --bg-cream-alt:#E4DAC4;
+  /* --- ink --- */
+  --ink-cream:#F0E8D2;
+  --ink-cream-2:rgba(240,232,210,.78);
+  --ink-cream-3:rgba(240,232,210,.50);
+  --ink-dark:#1E2820;
+  --ink-dark-2:rgba(30,40,32,.78);
+  --ink-dark-3:rgba(30,40,32,.50);
+  /* --- the one accent. Punctuation only: kickers, rules, inline <em>. --- */
+  --accent:#D4843E;
+  --wood:#7A4E24;
+  /* --- hairlines: the only divider language, never above 1px --- */
+  --bd-dark:rgba(240,232,210,.12);
+  --bd-cream:rgba(30,40,32,.14);
+
+  --stage-bg:#161d18;
+  --slide-bg:#232E26;
+
+  --f-display:'Bricolage Grotesque',sans-serif;
+  --f-body:'DM Sans',sans-serif;
+  --f-mono:'DM Mono',monospace;
+
+  --pad-x:120px;
+  --pad-y:76px;
+
+  --ease:cubic-bezier(.16,1,.3,1);
+  --dur:.66s;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+/* --- PASTE-POINT: viewport-base.css goes here at build time --- */
+/* Vendored from https://github.com/zarazhangrui/frontend-slides (MIT, Zara Zhang 2025).
+   build.py pastes this file where deck.css says __VIEWPORT_BASE__. Do not edit here. */
+
+/* ===========================================
+   FIXED 16:9 STAGE: MANDATORY BASE STYLES
+   Include this ENTIRE file in every presentation.
+   Slides are authored at 1920×1080 and scaled as a whole.
+   =========================================== */
+
+/* 1. Lock the browser viewport */
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+
+/* 2. Full-window deck viewport */
+.deck-viewport {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: var(--stage-bg, #000);
+}
+
+/* 3. Fixed 16:9 design canvas.
+   JavaScript sets transform: translate(...) scale(...). */
+.deck-stage {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    transform-origin: 0 0;
+    background: var(--slide-bg, #fff);
+}
+
+/* 4. Slides stack inside the fixed stage.
+   Content must be laid out at 1920×1080, not reflowed per device. */
+.slide {
+    position: absolute;
+    inset: 0;
+    width: 1920px;
+    height: 1080px;
+    overflow: hidden;
+    display: block;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    background: var(--slide-bg, #fff);
+}
+
+.slide.active,
+.slide.visible {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    z-index: 1;
+}
+
+/* 5. Keep media inside authored slide bounds */
+img,
+video,
+canvas,
+svg {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* 6. Presentation chrome stays outside the slide design system */
+.deck-controls {
+    position: fixed;
+    left: 50%;
+    bottom: 22px;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+
+/* 7. Print one fixed-size slide per page */
+@media print {
+    html,
+    body {
+        width: 1920px;
+        height: auto;
+        overflow: visible;
+        background: #fff;
+    }
+
+    .deck-viewport {
+        position: static;
+        overflow: visible;
+        background: #fff;
+    }
+
+    .deck-stage {
+        position: static;
+        width: auto;
+        height: auto;
+        transform: none !important;
+        background: none;
+    }
+
+    .slide {
+        position: relative;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        width: 1920px;
+        height: 1080px;
+        break-after: page;
+        page-break-after: always;
+    }
+
+    .slide:last-child {
+        break-after: auto;
+        page-break-after: auto;
+    }
+
+    .deck-controls {
+        display: none !important;
+    }
+}
+
+/* 8. Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.2s !important;
+    }
+}
+
+/* ===========================================================================
+   GROUNDS
+   Dark is the default and carries the wood glow. Cream is a deliberate tonal
+   break with no glow. Void is for the thesis and the close: nothing on it but
+   the sentence.
+   =========================================================================== */
+.slide{font-family:var(--f-body);color:var(--ink-cream);background:var(--bg-dark);
+  padding:var(--pad-y) var(--pad-x)}
+.slide.dark::before{content:"";position:absolute;right:0;bottom:0;width:55%;height:70%;
+  background:radial-gradient(ellipse at bottom right,rgba(122,78,36,.28) 0%,rgba(80,50,20,.14) 45%,transparent 72%);
+  pointer-events:none;z-index:0}
+.slide.cream{background:var(--bg-cream);color:var(--ink-dark)}
+.slide.cream .muted{color:var(--ink-dark-2)}
+.slide.dark  .muted{color:var(--ink-cream-2)}
+.slide > *{position:relative;z-index:2}
+.slide.void{background:#0A0F0C;color:var(--ink-cream)}
+
+/* ===========================================================================
+   TYPE
+   Heavy mixed-case display + light body + small uppercase mono label.
+   Display type is never uppercased; uppercase belongs to mono only.
+   =========================================================================== */
+.display{font-family:var(--f-display);font-weight:800;font-size:220px;line-height:.94;
+  letter-spacing:-.035em;padding-bottom:.02em}
+h1{font-family:var(--f-display);font-weight:800;font-size:132px;line-height:1.0;
+  letter-spacing:-.030em;padding-bottom:.02em}
+h2{font-family:var(--f-display);font-weight:700;font-size:78px;line-height:1.07;
+  letter-spacing:-.022em;padding-bottom:.03em}
+h3{font-family:var(--f-display);font-weight:600;font-size:44px;line-height:1.14;
+  letter-spacing:-.014em}
+.lead{font-size:34px;line-height:1.44}
+.body{font-size:25px;line-height:1.52}
+.caption{font-size:20px;line-height:1.45}
+.kicker{font-family:var(--f-mono);font-size:17px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--accent)}
+.label{font-family:var(--f-mono);font-size:17px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-cream-3)}
+.cream .label{color:var(--ink-dark-3)}
+.pull{font-family:var(--f-display);font-weight:600;font-size:46px;line-height:1.2;
+  letter-spacing:-.018em;padding-bottom:.02em}
+.stat{font-family:var(--f-display);font-weight:800;font-size:104px;line-height:1.08;
+  letter-spacing:-.03em;padding-bottom:.04em}
+/* <em> is an inline colour switch and stays upright; .stress is spoken stress */
+em{font-style:normal;color:var(--accent)}
+.stress{font-style:italic}
+strong{font-weight:700}
+.rule{width:32px;height:1px;background:var(--accent);margin:20px 0 0}
+
+/* a placeholder: something that still has to be written or drawn.
+   build.py lists every one of these on every build. */
+.ph{color:var(--accent);font-family:var(--f-mono);font-size:.86em}
+
+/* ===========================================================================
+   CHROME — a mono label pair top and bottom, separated by a hairline.
+   Cover, quote and closing slides carry neither.
+   =========================================================================== */
+.chrome{position:absolute;left:var(--pad-x);right:var(--pad-x);top:52px;
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding-bottom:14px;border-bottom:1px solid var(--bd-dark);z-index:3}
+.cream .chrome{border-bottom-color:var(--bd-cream)}
+.chrome .label:only-child{margin-left:auto}
+.footband{position:absolute;left:var(--pad-x);right:var(--pad-x);bottom:48px;
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding-top:14px;border-top:1px solid var(--bd-dark);z-index:3;
+  font-family:var(--f-mono);font-size:15px;letter-spacing:.06em;color:var(--ink-cream-3)}
+.cream .footband{border-top-color:var(--bd-cream);color:var(--ink-dark-3)}
+.footband a{color:inherit;text-decoration:none;border-bottom:1px solid currentColor}
+
+/* a content block centred between the chrome band and the foot band */
+.fillbody{position:absolute;left:var(--pad-x);right:var(--pad-x);top:118px;bottom:130px;
+  display:flex;flex-direction:column;justify-content:center;z-index:2}
+.fillbody > .head{margin-top:0}
+/* content sits below the chrome band */
+.head{margin-top:74px}
+.head h2 + .lead,.head h1 + .lead{margin-top:26px;color:var(--ink-cream-2);max-width:1400px}
+.cream .head h2 + .lead{color:var(--ink-dark-2)}
+
+/* ===========================================================================
+   LAYOUT HELPERS
+   No rounded corners anywhere. No shadows. Regions are separated by hairlines.
+   =========================================================================== */
+.row{display:flex;gap:48px}
+.col{flex:1}
+.stack{display:flex;flex-direction:column}
+
+/* the cream info-card: a piece of warm paper inset on the dark field */
+.info{background:var(--bg-cream);color:var(--ink-dark);padding:34px 38px}
+.info h3{color:var(--ink-dark);margin-bottom:12px}
+.info .body{color:var(--ink-dark-2)}
+
+/* a region divided by hairlines rather than boxed */
+.cell{padding:0 0 0 30px;border-left:1px solid var(--bd-dark)}
+.cream .cell{border-left-color:var(--bd-cream)}
+.cell:first-child{padding-left:0;border-left:none}
+
+/* bullets: an em-dash marker in accent mono. Never a dot, never a check. */
+ul.ticks{list-style:none}
+ul.ticks li{position:relative;padding-left:1.5em;margin-bottom:15px;
+  font-size:25px;line-height:1.46}
+ul.ticks li::before{content:"—";position:absolute;left:0;top:0;
+  font-family:var(--f-mono);color:var(--accent)}
+ul.ticks.tight li{font-size:22px;margin-bottom:10px}
+
+table{width:100%;border-collapse:collapse;font-size:22px}
+th,td{text-align:left;padding:14px 16px;border-bottom:1px solid var(--bd-cream);vertical-align:top}
+th{font-family:var(--f-mono);font-size:15px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-dark-2)}
+.dark table th,.dark table td,.void table th,.void table td{border-color:var(--bd-dark)}
+.dark table th,.void table th{color:var(--ink-cream-2)}
+td.n{font-family:var(--f-mono);white-space:nowrap}
+
+/* the presenter credit on the cover: readable from the back row */
+.credit{font-family:var(--f-mono);font-size:26px;letter-spacing:.06em;color:var(--ink-cream-2)}
+
+/* two plates side by side. Square corners, hairline, no shadow. */
+.plates{position:absolute;left:var(--pad-x);right:var(--pad-x);top:168px;z-index:3;
+  display:flex;gap:48px}
+.plate{flex:1;margin:0}
+.plate-media,.plate-holder{display:block;width:100%;height:688px;
+  border:1px solid var(--bd-dark);background:#0A0F0C}
+.plate-media{object-fit:cover}
+.plate-holder{background:rgba(240,232,210,.06);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  text-align:center;padding:0 60px}
+.plate-holder .ph-title{font-family:var(--f-mono);font-size:19px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-cream-2)}
+.plate-holder .ph-note{font-size:20px;line-height:1.5;color:var(--ink-cream-3);max-width:460px}
+.plate figcaption{margin-top:22px;color:var(--ink-cream)}
+
+/* a sources list: label, where it was used, link */
+.src{padding:14px 0;border-bottom:1px solid var(--bd-dark);font-size:22px;line-height:1.4}
+.src b{display:block;font-weight:600}
+.src .on{font-family:var(--f-mono);font-size:15px;color:var(--ink-cream-3);margin-left:14px}
+.src a{color:var(--ink-cream-2);text-decoration:none;border-bottom:1px solid var(--bd-dark)}
+
+/* ===========================================================================
+   LIVE FIGURES
+   Every animated figure is a <canvas data-viz="..."> drawn by viz.js.
+   Only the active slide's figures run.
+   =========================================================================== */
+.fig{display:block;background:#1B241E;border:1px solid var(--bd-dark)}
+.fig-full{position:absolute;inset:0;width:1920px;height:1080px;z-index:0}
+.fig-cap{margin-top:22px}
+.fig-cap h3{font-size:38px;margin-bottom:10px}
+.fig-cap .cite{font-family:var(--f-mono);font-size:15px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--ink-cream-3);margin-top:12px}
+
+/* scrims so type stays legible over a live field */
+.scrim{position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(to top,rgba(35,46,38,.97) 0%,rgba(35,46,38,.90) 24%,
+    rgba(35,46,38,.34) 46%,rgba(35,46,38,.10) 62%,rgba(35,46,38,.50) 100%)}
+.scrim-soft{background:linear-gradient(to top,rgba(10,15,12,.92) 0%,rgba(10,15,12,.72) 38%,
+    rgba(10,15,12,.62) 100%)}
+
+/* ===========================================================================
+   MOTION — one orchestrated reveal per slide, staggered.
+   ?t= (stills, PDF, checks) and reduced motion resolve to the finished state.
+   =========================================================================== */
+.reveal{opacity:0;transform:translateY(26px);
+  transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease)}
+.slide.visible .reveal{opacity:1;transform:none}
+.slide.visible .reveal:nth-child(1){transition-delay:.06s}
+.slide.visible .reveal:nth-child(2){transition-delay:.14s}
+.slide.visible .reveal:nth-child(3){transition-delay:.22s}
+.slide.visible .reveal:nth-child(4){transition-delay:.30s}
+.slide.visible .reveal:nth-child(5){transition-delay:.38s}
+.slide.visible .reveal:nth-child(6){transition-delay:.46s}
+/* .reveal.r-late, not .r-late: the nth-child stagger outranks a bare class */
+.slide.visible .reveal.r-late{transition-delay:1.9s}
+.slide.visible .reveal.r-late2{transition-delay:2.6s}
+body.settled .reveal{opacity:1!important;transform:none!important;transition:none!important}
+@media (prefers-reduced-motion:reduce){
+  .reveal{opacity:1!important;transform:none!important;transition:none!important}
+}
+
+/* ===========================================================================
+   DECK CHROME — nav dots and counter, outside the design language proper.
+   =========================================================================== */
+.deck-controls{left:auto;right:22px;bottom:18px;transform:none;
+  opacity:.13;transition:opacity .25s;display:flex;gap:16px;align-items:center;
+  font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;
+  color:rgba(240,232,210,.5);background:rgba(35,46,38,.86);
+  border:1px solid rgba(240,232,210,.13);padding:9px 18px;backdrop-filter:blur(8px)}
+.deck-controls:hover{opacity:1}
+body.settled .deck-controls{display:none}
+.deck-controls button{background:none;border:none;color:inherit;font:inherit;cursor:pointer;padding:2px 7px}
+.deck-controls button:hover{color:var(--accent)}
+.dots{display:flex;gap:6px}
+.dot{width:5px;height:5px;border-radius:50%;background:rgba(240,232,210,.25)}
+.dot.on{background:var(--accent)}
+
+/* Print / PDF: the paper must match the 1920x1080 slide or every page is
+   clipped at the right edge. Presenter-only chrome is suppressed. In print
+   every slide is shown at once, so every reveal resolves to its final state. */
+@media print{
+  @page{size:1920px 1080px;margin:0}
+  .deck-controls,#notesPanel,.edit-toggle,.edit-hotzone{display:none!important}
+  .slide{break-inside:avoid;page-break-inside:avoid}
+  .reveal{opacity:1!important;transform:none!important;transition:none!important}
+}
+
+/* speaker notes — press N. Never shown to the room. */
+#notesPanel{position:fixed;left:50%;transform:translateX(-50%);bottom:66px;max-width:920px;
+  display:none;background:rgba(24,32,26,.96);border:1px solid rgba(240,232,210,.16);
+  padding:18px 24px;color:rgba(240,232,210,.85);font-family:var(--f-body);
+  font-size:15px;line-height:1.6;z-index:1000}
+#notesPanel.on{display:block}
+body.settled #notesPanel{display:none}
+
+/* inline editing affordance: hover the top-left corner or press E */
+.edit-hotzone{position:fixed;top:0;left:0;width:80px;height:80px;z-index:10000;cursor:pointer}
+.edit-toggle{position:fixed;top:16px;left:16px;z-index:10001;opacity:0;pointer-events:none;
+  transition:opacity .3s ease;background:rgba(35,46,38,.9);color:var(--ink-cream);
+  border:1px solid rgba(240,232,210,.2);padding:8px 12px;font:inherit;font-size:14px;cursor:pointer}
+.edit-toggle.show,.edit-toggle.active{opacity:1;pointer-events:auto}
+.edit-toggle.active{border-color:var(--accent);color:var(--accent)}
+body.editing [contenteditable]{outline:1px dashed rgba(192,112,48,.6);outline-offset:4px}
+
+</style>
+</head>
+<body>
+<div class="deck-viewport">
+<main class="deck-stage" id="deckStage">
+<!-- ═══════════════════════════════════════════════════════════════════════
+     The example deck: eight slides that show every layout the theme has.
+     Order, timings and speaker notes: ../outline.md (matched by data-slide).
+     Each <section> is one slide. Classes: dark | cream | void.
+     "00 / 00" in the chrome band is rewritten by the build.
+     a span with class=ph marks something still to write; the build
+     lists every one. a canvas with data-viz=name is drawn by viz.js.
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<!-- 01 · COVER — void ground, live field, no chrome ───────────────────── -->
+<section class="slide void" data-slide="01">
+  <canvas class="fig-full" data-viz="drift" data-opt='{"quiver":true}' width="1920" height="1080" style="opacity:.34"></canvas>
+  <div class="scrim scrim-soft"></div>
+  <div style="position:absolute;left:var(--pad-x);right:var(--pad-x);top:300px;z-index:3">
+    <div class="kicker reveal">talk-harness</div>
+    <h1 class="reveal" style="margin-top:26px;max-width:1500px">A talk built with <em style="white-space:nowrap">talk-harness</em></h1>
+    <p class="lead reveal r-late" style="margin-top:40px;font-size:40px;color:var(--ink-cream-2);max-width:1300px">Eight slides that show every layout, and the rules the build enforces.</p>
+  </div>
+  <div class="credit" style="position:absolute;left:var(--pad-x);bottom:66px;z-index:3">
+    Your name &nbsp;&middot;&nbsp; Your lab &nbsp;&middot;&nbsp; Date
+  </div>
+</section>
+
+<!-- 02 · TWO COLUMNS — dark ground, chrome band, ticks ──────────────────── -->
+<section class="slide dark" data-slide="02" data-cite="frontend-slides" data-notes="Every deck from this harness is built by one script. It numbers the slides from their order in the file. It lists every placeholder. It sums the timings from the outline. It fails if a speaker note would break the page. If a number is on a slide, the slide says where it came from.">
+  <div class="chrome"><span class="label">02 / 07</span></div>
+  <div class="head">
+    <h2 class="reveal">What the build enforces</h2>
+    <p class="lead reveal">One script assembles the deck. These are the things it will not let pass quietly.</p>
+  </div>
+  <div class="row reveal" style="margin-top:64px">
+    <div class="col cell">
+      <div class="kicker">every build</div>
+      <ul class="ticks" style="margin-top:22px">
+        <li>Slide numbers come from the order in the file.</li>
+        <li>Every placeholder is listed, by slide.</li>
+        <li>The talk time is summed from the outline.</li>
+        <li>Speaker notes come from the outline, not the slide.</li>
+      </ul>
+    </div>
+    <div class="col cell">
+      <div class="kicker">the build fails</div>
+      <ul class="ticks" style="margin-top:22px">
+        <li>A raw double quote inside a speaker note.</li>
+        <li>A figure name that viz.js does not define.</li>
+        <li>A slide with no entry in the outline.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footband"><span>the stage is 1920 &times; 1080 and never reflows</span><span class="cites"><a href="https://github.com/zarazhangrui/frontend-slides" target="_blank" rel="noopener">zarazhangrui/frontend-slides (MIT)</a></span></div>
+</section>
+
+<!-- 03 · LIVE SCHEMATIC — canvas, footer disclaimer ─────────────────────── -->
+<section class="slide dark" data-slide="03" data-notes="This figure is drawn live by viz.js. The points are made up, and the footer says so. When a figure is an illustration, the slide says it where the figure is, not at the end of the talk.">
+  <div class="chrome"><span class="label">03 / 07</span></div>
+  <div class="head">
+    <h2 class="reveal">A schematic, and it says so</h2>
+    <p class="lead reveal">Each point is one measurement. Close together means similar. The labels arrive in the order you would say them.</p>
+  </div>
+  <canvas data-viz="scatter-labels" width="1680" height="520" style="position:absolute;left:120px;top:400px"></canvas>
+  <div class="footband"><span>Schematic: the points are made up. A figure that is an illustration says so on its own face.</span></div>
+</section>
+
+<!-- 04 · TABLE — cream ground ──────────────────────────────────────────── -->
+<section class="slide cream" data-slide="04" data-notes="The outline carries five fields per slide. Time is summed. Notes land in the notes panel. Source is where every fact on the slide came from. Visual and Beat are for the author.">
+  <div class="chrome"><span class="label">04 / 07</span></div>
+  <div class="head">
+    <h2 class="reveal">The outline fields</h2>
+    <p class="lead reveal">One heading per slide in <code style="font-family:var(--f-mono);font-size:.8em">outline.md</code>, and up to five lines under it.</p>
+  </div>
+  <table class="reveal" style="margin-top:56px;font-size:26px">
+    <thead><tr><th style="width:220px">field</th><th>what it holds</th><th style="width:560px">example</th></tr></thead>
+    <tbody>
+      <tr><td class="n">Time</td><td>How long the slide takes. The build sums these.</td><td class="n">Time: 1:30</td></tr>
+      <tr><td class="n">Notes</td><td>What is said. Lands in the notes panel (press N).</td><td class="n">Notes: Say the title. Pause.</td></tr>
+      <tr><td class="n">Source</td><td>Where every fact on the slide comes from, or TODO[value].</td><td class="n">Source: results/table3.csv</td></tr>
+      <tr><td class="n">Visual</td><td>What is on screen, in one line. For the author.</td><td class="n">Visual: one number, its source</td></tr>
+      <tr><td class="n">Beat</td><td>The one thing the room takes from the slide.</td><td class="n">Beat: a number alone is a claim</td></tr>
+    </tbody>
+  </table>
+  <div class="footband"><span>Spanish field names (Tiempo, Notas, Fuente) are accepted too</span></div>
+</section>
+
+<!-- 05 · ONE NUMBER — stat with its source ─────────────────────────────── -->
+<section class="slide dark" data-slide="05" data-cite="frontend-slides" data-notes="The stage is nineteen-twenty by ten-eighty. The whole stage scales to the screen as one unit, so nothing reflows. That number is in viewport-base.css, and the slide says so.">
+  <div class="chrome"><span class="label">05 / 07</span></div>
+  <div class="fillbody">
+    <div class="kicker reveal">the stage</div>
+    <div class="stat reveal" style="margin-top:18px;font-size:200px">1920 <span style="color:var(--accent)">&times;</span> 1080</div>
+    <p class="lead reveal" style="margin-top:22px;max-width:1300px;color:var(--ink-cream-2)">The whole stage scales to the screen as one unit. Nothing reflows, on a phone or a projector.</p>
+    <p class="caption reveal r-late" style="margin-top:34px;font-family:var(--f-mono);color:var(--ink-cream-3)">Source: _src/viewport-base.css, section 3. A number with a file is a fact; a number alone is a claim.</p>
+  </div>
+  <div class="footband"><span>one number per slide, and where it came from</span><span class="cites"><a href="https://github.com/zarazhangrui/frontend-slides" target="_blank" rel="noopener">zarazhangrui/frontend-slides (MIT)</a></span></div>
+</section>
+
+<!-- 06 · FIGURE FROM A FILE — media token, caption ───────────────────── -->
+<section class="slide dark" data-slide="06" data-cite="chrome-headless" data-notes="Figures come from the assets folder through a media token. The build links them by default, so the folder ships. Pass embed-media for one portable file. This one is an illustration; the figure says so on its own face.">
+  <div class="chrome"><span class="label">06 / 07</span></div>
+  <div class="head">
+    <h2 class="reveal">A figure from a file</h2>
+  </div>
+  <div class="row" style="margin-top:40px;align-items:flex-start">
+    <figure class="reveal" style="flex:0 0 880px;margin:0">
+      <img src="assets/example-figure.svg" width="880" height="560" style="display:block;border:1px solid var(--bd-dark)" alt="An illustration of a curve rising with depth">
+    </figure>
+    <div class="col reveal r-late" style="padding-top:12px">
+      <p class="lead">Media comes from <span style="font-family:var(--f-mono);font-size:.85em">assets/</span> through a token in the slide.</p>
+      <ul class="ticks" style="margin-top:26px">
+        <li>Linked by default, so the folder ships with the file.</li>
+        <li><span style="font-family:var(--f-mono);font-size:.85em">--embed-media</span> inlines it for one portable file.</li>
+        <li>A missing file is listed on every build.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footband"><span>assets/example-figure.svg, an illustration drawn for this deck</span><span class="cites"><a href="https://developer.chrome.com/docs/chromium/headless" target="_blank" rel="noopener">Chrome headless mode, developer docs</a></span></div>
+</section>
+
+<!-- 07 · SOURCES — written by the build ────────────────────────────────── -->
+<section class="slide dark" data-slide="07" data-notes="Everything cited in the deck is listed here, with the slide it was used on. The build writes this list, so it cannot drift from the slides.">
+  <div class="chrome"><span class="label">07 / 07</span></div>
+  <div class="head">
+    <h2 class="reveal">Sources</h2>
+    <p class="lead reveal">Everything the deck cited, with the slide it appears on. The build writes this list.</p>
+  </div>
+  <div class="reveal" style="margin-top:48px;max-width:1500px">
+<div class="src"><b>zarazhangrui/frontend-slides (MIT)<span class="on">slide 2, 5</span></b><a href="https://github.com/zarazhangrui/frontend-slides" target="_blank" rel="noopener">https://github.com/zarazhangrui/frontend-slides</a></div>
+<div class="src"><b>Chrome headless mode, developer docs<span class="on">slide 6</span></b><a href="https://developer.chrome.com/docs/chromium/headless" target="_blank" rel="noopener">https://developer.chrome.com/docs/chromium/headless</a></div>
+  </div>
+  <div class="footband"><span>sources/citations.json</span></div>
+</section>
+
+<!-- 08 · BACKUP — not numbered, not timed ──────────────────────────────── -->
+<section class="slide dark" data-slide="08" data-backup data-notes="A backup slide. It is not numbered and does not count toward the time.">
+  <div class="chrome"><span class="label">Backup</span></div>
+  <div class="head">
+    <h2 class="reveal">Keys</h2>
+  </div>
+  <table class="reveal" style="margin-top:48px;font-size:28px;max-width:1100px">
+    <tbody>
+      <tr><td class="n" style="width:300px">&larr; &rarr; space</td><td>previous, next</td></tr>
+      <tr><td class="n">#12 in the URL</td><td>open on slide 12</td></tr>
+      <tr><td class="n">N</td><td>speaker notes. Off before you share a screen.</td></tr>
+      <tr><td class="n">E, then Ctrl+S</td><td>edit text in place, download the edited file</td></tr>
+      <tr><td class="n">F</td><td>fullscreen</td></tr>
+      <tr><td class="n">?t=6</td><td>freeze every figure at second 6 (stills, PDF)</td></tr>
+    </tbody>
+  </table>
+  <div class="footband"><span>a backup slide: unnumbered, and not counted in the time</span></div>
+</section>
+
+</main>
+</div>
+<script>
+/* =========================================================================
+   LIVE VISUALS
+   -------------------------------------------------------------------------
+   Each visual is registered by name in VIZ and mounted on any
+   <canvas data-viz="name"> in the deck. It returns:
+
+     { printAt: seconds,        the instant that represents it in a still
+       reset(),                 called every time its slide is entered
+       frame(t) }               called each animation frame; t in seconds
+
+   Only the active slide's visuals run. Nothing here loads a library, an
+   image or the network. Numbers drawn by a visual come from a file the
+   build read, or the visual is a schematic and its slide's footer says so.
+
+   Helpers below: mkRnd (seeded random, so the picture is identical on
+   every load), gauss, smoothstep, rgba, ground, arrowHead, FONT.
+   ========================================================================= */
+const VIZ = {};
+const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+/* ?t=<seconds> freezes every visual at a settled moment (stills, PDF, checks) */
+const TOFF = parseFloat(new URLSearchParams(location.search).get('t') || '0') || 0;
+/* Chrome prints transparent canvas pixels as white. While printing, a
+   visual that relies on the slide showing through paints its own ground. */
+let PRINTING = false;
+
+function mkRnd(seed){
+  return function(){ seed = (seed*1664525 + 1013904223) % 4294967296; return seed/4294967296; };
+}
+function gauss(rnd){ let u = 0, v = 0; while(!u) u = rnd(); while(!v) v = rnd();
+  return Math.sqrt(-2*Math.log(u)) * Math.cos(2*Math.PI*v); }
+const clamp01 = x => Math.max(0, Math.min(1, x));
+const smoothstep = (a,b,x) => { const t = clamp01((x-a)/(b-a)); return t*t*(3-2*t); };
+const rgba = (t,a) => 'rgba(' + t + ',' + clamp01(a).toFixed(3) + ')';
+
+/* the theme's colours, read from the CSS tokens so a re-skin carries over */
+const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const hexToTriplet = h => { h = h.replace('#',''); if(h.length === 3) h = [...h].map(c => c+c).join('');
+  return [0,2,4].map(i => parseInt(h.slice(i,i+2),16)).join(','); };
+const C = {
+  ground: css('--bg-dark')  || '#232E26',
+  void:   '#0A0F0C',
+  paper:  hexToTriplet(css('--ink-cream') || '#F0E8D2'),
+  ink:    hexToTriplet(css('--ink-dark')  || '#1E2820'),
+  accent: hexToTriplet(css('--accent')    || '#D4843E')
+};
+const FONT = {
+  body:  s => s + 'px ' + (css('--f-body') || 'sans-serif'),
+  bold:  s => '700 ' + s + 'px ' + (css('--f-display') || 'sans-serif'),
+  mono:  s => s + 'px ' + (css('--f-mono') || 'monospace')
+};
+
+function ground(ctx, W, H, col){
+  if(PRINTING){ ctx.fillStyle = col; ctx.fillRect(0,0,W,H); }
+  else ctx.clearRect(0,0,W,H);
+}
+function arrowHead(ctx, x, y, ang, s){
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x - s*Math.cos(ang - .45), y - s*Math.sin(ang - .45));
+  ctx.lineTo(x - s*Math.cos(ang + .45), y - s*Math.sin(ang + .45));
+  ctx.closePath(); ctx.fill();
+}
+
+/* =========================================================================
+   DRIFT — an ambient field for covers and closes. Points ride a slow,
+   smooth flow made of three sine fields; they leave short trails.
+   With data-opt='{"quiver":true}' a lattice of arrows sweeps in from the
+   left at 1.6 s and shows the flow the points are riding.
+   ========================================================================= */
+VIZ['drift'] = function(cv){
+  const W = cv.width, H = cv.height, ctx = cv.getContext('2d');
+  const opt = JSON.parse(cv.dataset.opt || '{}');
+  const rnd = mkRnd(20261102);
+  const N = 600, P = new Float32Array(N*2);
+  for(let i=0;i<N;i++){ P[i*2] = rnd(); P[i*2+1] = rnd(); }
+  const flow = (x, y, t, out) => {
+    const a = Math.sin(3.1*y + .21*t) + .5*Math.sin(5.3*x - .17*t);
+    const b = Math.cos(2.7*x + .13*t) + .5*Math.cos(4.1*y + .19*t);
+    out[0] = a*.0011 + .0004; out[1] = b*.0011;
+  };
+  const OUT = [0,0];
+  const wipe = () => { ctx.fillStyle = C.void; ctx.fillRect(0,0,W,H); };
+  wipe();
+  return {
+    printAt: 6,
+    reset: wipe,
+    frame(el){
+      const t = REDUCE ? 6 : el;
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = 'rgba(10,15,12,0.06)'; ctx.fillRect(0,0,W,H);
+      ctx.globalCompositeOperation = 'lighter';
+      for(let i=0;i<N;i++){
+        let x = P[i*2], y = P[i*2+1];
+        flow(x, y, t, OUT);
+        const sp = Math.hypot(OUT[0], OUT[1]) / .0016;
+        x += OUT[0]; y += OUT[1];
+        if(x<0) x+=1; else if(x>1) x-=1;
+        if(y<0) y+=1; else if(y>1) y-=1;
+        P[i*2]=x; P[i*2+1]=y;
+        ctx.fillStyle = rgba(C.paper, .16 + .30*sp);
+        ctx.fillRect(x*W - 1.3, y*H - 1.3, 2.6, 2.6);
+      }
+      ctx.globalCompositeOperation = 'source-over';
+      if(opt.quiver){
+        const QX = 17, QY = 10, L = 46;
+        ctx.lineWidth = 2.2;
+        for(let qx=0; qx<QX; qx++){
+          const nx = (qx+.5)/QX;
+          const sweep = REDUCE ? 1 : clamp01((el - 1.6 - nx*.85)/.55);
+          if(sweep <= 0) continue;
+          for(let qy=0; qy<QY; qy++){
+            const ny = (qy+.5)/QY;
+            flow(nx, ny, t, OUT);
+            const mag = Math.hypot(OUT[0], OUT[1]) / .0016;
+            const ang = Math.atan2(OUT[1], OUT[0]);
+            const a = sweep * (.30 + .45*clamp01(mag)) * .9;
+            ctx.strokeStyle = ctx.fillStyle = rgba(C.paper, a);
+            const x0 = nx*W - Math.cos(ang)*L*.5, y0 = ny*H - Math.sin(ang)*L*.5;
+            const x1 = nx*W + Math.cos(ang)*L*.5, y1 = ny*H + Math.sin(ang)*L*.5;
+            ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+            arrowHead(ctx, x1, y1, ang, 12);
+          }
+        }
+      }
+    }
+  };
+};
+
+/* =========================================================================
+   SCATTER-LABELS — a schematic. Points fly in and settle into three groups
+   joined by a bridge; four readings then appear one at a time with leader
+   lines. Draws no data: a slide that uses it says so in its footer.
+   ========================================================================= */
+VIZ['scatter-labels'] = function(cv){
+  const W = cv.width, H = cv.height, ctx = cv.getContext('2d');
+  const rnd = mkRnd(7);
+  const pts = [];
+  const blob = (cx, cy, sd, n) => { for(let i=0;i<n;i++) pts.push([cx + gauss(rnd)*sd, cy + gauss(rnd)*sd*1.15]); };
+  blob(.20, .36, .055, 130);
+  for(let i=0;i<95;i++){ const u = rnd(); pts.push([.27 + u*.26 + gauss(rnd)*.012, .45 + u*.24 + gauss(rnd)*.018]); }
+  blob(.57, .74, .055, 130);
+  blob(.86, .34, .05, 110);
+  const P = pts.map(p => ({tx:p[0], ty:p[1], sx:rnd(), sy:rnd(), d:rnd()*.8, ph:rnd()*6.28}));
+  const pick = P[12];
+  const notes = [
+    {at:2.2, text:['each point:', 'one measurement'],     col:C.accent, tx:.08, ty:.08, px:pick.tx, py:pick.ty},
+    {at:3.8, text:['close together:', 'similar'],         col:C.paper,  tx:.04, ty:.80, px:.18,  py:.47},
+    {at:5.4, text:['a bridge: one group', 'changing gradually'], col:C.paper, tx:.40, ty:.20, px:.40, py:.565},
+    {at:7.0, text:['a gap: two groups', 'that never mix'], col:C.accent, tx:.70, ty:.80, px:.72,  py:.50}
+  ];
+  return {
+    printAt: 9,
+    frame(t){
+      ground(ctx, W, H, C.ground);
+      for(const p of P){
+        const k = smoothstep(p.d, p.d + 1.2, t);
+        const x = (p.sx + (p.tx - p.sx)*k + Math.sin(t*.8 + p.ph)*.0015) * W;
+        const y = (p.sy + (p.ty - p.sy)*k + Math.cos(t*.7 + p.ph)*.0015) * H;
+        ctx.fillStyle = rgba(C.paper, .30 + .55*k);
+        ctx.beginPath(); ctx.arc(x, y, 5, 0, 6.283); ctx.fill();
+      }
+      for(const n of notes){
+        const a = smoothstep(n.at, n.at + .6, t);
+        if(a <= 0) continue;
+        ctx.globalAlpha = a;
+        ctx.fillStyle = rgba(n.col, 1); ctx.strokeStyle = rgba(n.col, 1); ctx.lineWidth = 3;
+        ctx.font = FONT.body(30); ctx.textAlign = 'center';
+        const tx = n.tx*W + 150, ty = n.ty*H;
+        n.text.forEach((s, i) => ctx.fillText(s, tx, ty + i*38));
+        const px = n.px*W, py = n.py*H;
+        const sx = tx, sy = ty + (py > ty ? 60 : -40);
+        const ex = sx + (px - sx)*a, ey = sy + (py - sy)*a;
+        ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
+        if(a > .95) arrowHead(ctx, px, py, Math.atan2(py - sy, px - sx), 18);
+        if(n === notes[0] && a > .95){ ctx.beginPath(); ctx.arc(px, py, 14, 0, 6.283); ctx.stroke(); }
+        ctx.globalAlpha = 1;
+      }
+    }
+  };
+};
+
+/* =========================================================================
+   SLIDE CONTROLLER
+   Fixed 1920x1080 stage scaled as one unit; keyboard, wheel and touch
+   navigation; speaker notes; inline editing; and lifecycle management for
+   the live figures so that only the visible slide is ever simulating.
+
+   ?t=<seconds>  freeze every visual at that moment, no entrance motion
+   ?check=1      measure every slide and log problems to the console
+   #<n>          open on slide n
+   ========================================================================= */
+const DECK_ID = 'talk';   /* filled by build.py from deck.toml's output */
+
+class Deck {
+  constructor(){
+    this.slides  = [...document.querySelectorAll('.slide')];
+    /* numbered slides carry their own "NN / NN" in the chrome band; the
+       nav-bar counter would be a second number. It shows only on backup
+       slides, which have no band. */
+    const bx = this.slides.findIndex(s => s.hasAttribute('data-backup'));
+    this.backupAt = bx === -1 ? this.slides.length : bx;
+    this.stage   = document.getElementById('deckStage');
+    this.index   = 0;
+    this.figures = [];
+
+    this.mountFigures();
+    this.scaleStage();
+    this.bindNav();
+    this.buildChrome();
+    this.show(0);
+
+    /* one animation loop for the whole deck; parked figures cost nothing */
+    const tick = ts => {
+      for(const f of this.figures){
+        if(!f.running) continue;
+        if(f.t0 === null) f.t0 = ts;
+        f.inst.frame((ts - f.t0)/1000 + TOFF);
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+
+    /* printing captures every figure, not just the one that happens to be live */
+    addEventListener('afterprint', () => { PRINTING = false; });
+    addEventListener('beforeprint', () => {
+      PRINTING = true;
+      for(const f of this.figures){
+        /* each figure names the instant that represents it in a still; the
+           run-up matters too, since trails accumulate. */
+        const at = f.inst.printAt || 4.2;
+        f.inst.reset && f.inst.reset();
+        for(let k = 90; k >= 0; k--) f.inst.frame(at - k * 0.016);
+      }
+    });
+  }
+
+  /* --- attach every <canvas data-viz> to its visual --- */
+  mountFigures(){
+    document.querySelectorAll('canvas[data-viz]').forEach(cv => {
+      const make = VIZ[cv.dataset.viz];
+      if(!make){ console.error('no visual named', cv.dataset.viz); return; }
+      this.figures.push({ inst: make(cv), slide: cv.closest('.slide'), running:false, t0:null });
+    });
+  }
+
+  scaleStage(){
+    const fit = () => {
+      const s = Math.min(innerWidth/1920, innerHeight/1080);
+      this.stage.style.transform = `translate(${(innerWidth-1920*s)/2}px,${(innerHeight-1080*s)/2}px) scale(${s})`;
+    };
+    fit();
+    addEventListener('resize', fit);
+  }
+
+  bindNav(){
+    addEventListener('keydown', e => {
+      if(document.body.classList.contains('editing') && e.target.isContentEditable) return;
+      if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){ e.preventDefault(); this.go(1); }
+      if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){ e.preventDefault(); this.go(-1); }
+      if(e.key === 'Home') this.show(0);
+      if(e.key === 'End')  this.show(this.slides.length-1);
+      if((e.key === 'f' || e.key === 'F') && !e.target.isContentEditable){
+        document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+      }
+    });
+    let wheelLock = 0;
+    addEventListener('wheel', e => {
+      const now = Date.now();
+      if(now - wheelLock < 700) return;
+      if(Math.abs(e.deltaY) < 24) return;
+      wheelLock = now;
+      this.go(e.deltaY > 0 ? 1 : -1);
+    }, {passive:true});
+    let tx = 0, ty = 0;
+    addEventListener('touchstart', e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, {passive:true});
+    addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+      if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) this.go(dx < 0 ? 1 : -1);
+    }, {passive:true});
+  }
+
+  /* nav dots + counter, kept outside the slide stage */
+  buildChrome(){
+    const bar = document.createElement('nav');
+    bar.className = 'deck-controls';
+    bar.innerHTML =
+      '<button id="prev" aria-label="Previous slide">&larr;</button>' +
+      '<span class="dots"></span>' +
+      '<button id="next" aria-label="Next slide">&rarr;</button>' +
+      '<span id="counter"></span>' +
+      '<span style="opacity:.4">&middot;</span>' +
+      '<button id="notesBtn" title="Speaker notes (N)">notes</button>';
+    document.body.appendChild(bar);
+    const dots = bar.querySelector('.dots');
+    this.slides.forEach(() => dots.appendChild(Object.assign(document.createElement('i'), {className:'dot'})));
+    bar.querySelector('#prev').onclick = () => this.go(-1);
+    bar.querySelector('#next').onclick = () => this.go(1);
+    this.dots = [...dots.children];
+    this.counter = bar.querySelector('#counter');
+
+    /* the speaker-notes panel: presenter-side only */
+    this.notes = document.createElement('div');
+    this.notes.id = 'notesPanel';
+    document.body.appendChild(this.notes);
+    bar.querySelector('#notesBtn').onclick = () => this.toggleNotes();
+    addEventListener('keydown', e => {
+      if((e.key === 'n' || e.key === 'N') && !e.target.isContentEditable) this.toggleNotes();
+    });
+  }
+
+  go(d){ this.show(this.index + d); }
+
+  toggleNotes(){
+    this.notes.classList.toggle('on');
+    this.paintNotes();
+  }
+  paintNotes(){
+    if(!this.notes || !this.notes.classList.contains('on')) return;
+    const n = this.slides[this.index].dataset.notes;
+    this.notes.textContent = n || 'No notes for this slide.';
+  }
+
+  show(i){
+    this.index = Math.max(0, Math.min(i, this.slides.length - 1));
+    this.slides.forEach((s, n) => {
+      const on = n === this.index;
+      s.classList.toggle('active', on);
+      s.classList.toggle('visible', on);
+    });
+    /* start the figures on this slide, park every other one */
+    for(const f of this.figures){
+      const on = f.slide === this.slides[this.index];
+      if(on && !f.running){ f.running = true; f.t0 = null; f.inst.reset && f.inst.reset(); }
+      else if(!on) f.running = false;
+    }
+    if(this.dots) this.dots.forEach((d, n) => d.classList.toggle('on', n === this.index));
+    if(this.counter) this.counter.textContent = this.index >= this.backupAt
+      ? String(this.index+1).padStart(2,'0') + ' / ' + String(this.slides.length).padStart(2,'0')
+      : '';
+    this.paintNotes();
+    location.hash = '#' + (this.index + 1);
+  }
+
+  /* =======================================================================
+     CHECK MODE — ?check=1
+     Scale the stage to 1, show every slide in turn, and report anything
+     that leaves the 1920x1080 canvas, any text box that clips its own
+     content, and any image that did not load. One console line per
+     problem, so headless Chrome can collect them (tools/deck.py check).
+     Elements marked data-offstage are skipped: they are meant to be outside.
+     ======================================================================= */
+  check(){
+    this.stage.style.transform = 'none';
+    let problems = 0;
+    const tag = el => {
+      const id = el.id ? '#' + el.id : '';
+      const cls = el.classList.length ? '.' + [...el.classList].slice(0,2).join('.') : '';
+      return '<' + el.tagName.toLowerCase() + id + cls + '>';
+    };
+    this.slides.forEach((s, n) => {
+      this.show(n);
+      const nn = String(n+1).padStart(2,'0');
+      const sr = this.stage.getBoundingClientRect();
+      for(const el of s.querySelectorAll('*')){
+        if(el.closest('[data-offstage]')) continue;
+        const r = el.getBoundingClientRect();
+        if(r.width === 0 && r.height === 0) continue;
+        const L = Math.round(r.left - sr.left), T = Math.round(r.top - sr.top);
+        const R = Math.round(r.right - sr.left), B = Math.round(r.bottom - sr.top);
+        if(L < -1 || T < -1 || R > 1921 || B > 1081){
+          problems++; console.log(`CHECK slide ${nn}: overflow ${tag(el)} left=${L} top=${T} right=${R} bottom=${B}`);
+        }
+        const ov = getComputedStyle(el).overflow;
+        if(ov !== 'visible' && el.scrollHeight > el.clientHeight + 2 && el.clientHeight > 0 && !el.classList.contains('slide')){
+          problems++; console.log(`CHECK slide ${nn}: clipped text ${tag(el)} scrollHeight=${el.scrollHeight} clientHeight=${el.clientHeight}`);
+        }
+        if(el.tagName === 'IMG' && el.complete && el.naturalWidth === 0){
+          problems++; console.log(`CHECK slide ${nn}: broken image ${el.getAttribute('src')}`);
+        }
+      }
+    });
+    console.log(`CHECK done: ${this.slides.length} slides, ${problems} problems`);
+    this.show(0);
+    return problems;
+  }
+}
+
+/* =========================================================================
+   INLINE EDITING
+   Hover the top-left corner or press E. Click any text to edit; Ctrl+S saves
+   a copy of the edited deck. Edits persist in localStorage and come back
+   with ?restore in the URL.
+   ========================================================================= */
+class Editor {
+  constructor(deck){
+    this.deck = deck; this.isActive = false;
+    const zone = document.createElement('div'); zone.className = 'edit-hotzone';
+    const btn  = document.createElement('button');
+    btn.className = 'edit-toggle'; btn.id = 'editToggle';
+    btn.title = 'Edit mode (E)'; btn.textContent = 'Edit';
+    document.body.append(zone, btn);
+    this.btn = btn;
+
+    let hide = null;
+    const show = () => { clearTimeout(hide); btn.classList.add('show'); };
+    const later = () => { hide = setTimeout(() => { if(!this.isActive) btn.classList.remove('show'); }, 400); };
+    zone.addEventListener('mouseenter', show);
+    zone.addEventListener('mouseleave', later);
+    btn.addEventListener('mouseenter', show);
+    btn.addEventListener('mouseleave', later);
+    zone.addEventListener('click', () => this.toggle());
+    btn.addEventListener('click', () => this.toggle());
+
+    addEventListener('keydown', e => {
+      if((e.key === 'e' || e.key === 'E') && !e.target.isContentEditable) this.toggle();
+      if((e.metaKey || e.ctrlKey) && e.key === 's'){ e.preventDefault(); this.save(); }
+    });
+    this.restore();
+  }
+  targets(){
+    return document.querySelectorAll('.slide h1,.slide h2,.slide h3,.slide p,.slide li,.slide td,.slide .kicker,.slide .label,.slide .display');
+  }
+  toggle(){
+    this.isActive = !this.isActive;
+    document.body.classList.toggle('editing', this.isActive);
+    this.btn.classList.toggle('active', this.isActive);
+    this.btn.classList.toggle('show', this.isActive);
+    this.targets().forEach(el => {
+      el.contentEditable = this.isActive;
+      if(this.isActive) el.addEventListener('blur', this.persist, {once:true});
+    });
+  }
+  persist = () => {
+    try{ localStorage.setItem(DECK_ID + '-deck', document.querySelector('.deck-stage').innerHTML); }catch(e){}
+  }
+  restore(){
+    try{
+      const saved = localStorage.getItem(DECK_ID + '-deck');
+      if(saved && new URLSearchParams(location.search).has('restore'))
+        document.querySelector('.deck-stage').innerHTML = saved;
+    }catch(e){}
+  }
+  save(){
+    this.persist();
+    const blob = new Blob(['<!DOCTYPE html>\n' + document.documentElement.outerHTML], {type:'text/html'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = DECK_ID + '-edited.html';
+    a.click();
+  }
+}
+
+/* --- boot --- */
+/* read the deep link BEFORE constructing the deck: show() rewrites the hash */
+const START = parseInt((location.hash || '').slice(1), 10);
+const PARAMS = new URLSearchParams(location.search);
+if(TOFF || PARAMS.has('check')) document.body.classList.add('settled');
+const deck = new Deck();
+new Editor(deck);
+if(START >= 1) deck.show(START - 1);
+if(PARAMS.has('check')){
+  /* fonts change line breaks, so measure after they have arrived */
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => setTimeout(() => deck.check(), 300));
+}
+
+</script>
+</body>
+</html>
