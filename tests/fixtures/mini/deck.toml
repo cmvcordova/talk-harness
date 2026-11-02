@@ -1,0 +1,6 @@
+title  = "Mini"
+output = "mini.html"
+lang   = "en"
+media  = "assets"
+limit  = "1:00"
+fonts  = "https://fonts.googleapis.com/css2?family=DM+Sans&display=swap"
