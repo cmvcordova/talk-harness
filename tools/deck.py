@@ -130,14 +130,19 @@ def cmd_lint(root, a):
     import lint
     out = build(root)
     c = {**lint.DEFAULTS, **cfg(root).get("lint", {})}
-    found = [str(p) for p in lint.lint_slides((root / "_src" / "slides.html").read_text(), c)]
+    slides = lint.stage(out.read_text())     # the built deck: inline SVG figures are in place
+    found = [str(p) for p in lint.lint_slides(slides, c)]
     # the two rules that depend on how the text wraps are measured in the browser
     r = chrome(["--virtual-time-budget=10000", "--enable-logging=stderr", "--v=0", "--dump-dom",
                 f"file://{out}?check=1&t=1&lint={c['min_px']}"])
+    if not re.search(r'CONSOLE[:(]\d+\)?\]\s+"CHECK done', r.stderr):
+        print("  lint did not finish: the page threw before it was measured, or Chrome printed nothing. "
+              "Run `check` and `shots`, fix what they show, then lint again.")
+        return 1
     found += [m.group(1) for m in re.finditer(r'CONSOLE[:(]\d+\)?\]\s+"(LINT [^"]*)"', r.stderr)]
     text = (root / "outline.md").read_text() if (root / "outline.md").exists() else ""
     secs = sum(int(m.group(1)) * 60 + int(m.group(2)) for m in re.finditer(r"^-\s+\*{0,2}(?:Time|Tiempo)\*{0,2}:\s*(\d+):(\d{2})", text, flags=re.M))
-    numbered = lint.numbered((root / "_src" / "slides.html").read_text())
+    numbered = lint.numbered(slides)
     note = lint.pace(numbered, secs, c["slides_per_minute"])
     for line in sorted(found):
         print("  " + line)

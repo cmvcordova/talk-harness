@@ -88,6 +88,32 @@ class Body(unittest.TestCase):
         self.assertEqual(rules(html), [])
 
 
+class Svg(unittest.TestCase):
+    CLAIM = '<h2 class="claim">A claim that is a sentence.</h2>'
+
+    def test_an_inline_svg_is_a_figure(self):
+        body = self.CLAIM + '<ul class="ticks"><li>Read this curve</li></ul><svg viewBox="0 0 1 1"><g><circle/></g></svg>'
+        self.assertEqual(rules(slide(body)), [])
+
+    def test_three_inline_svgs_are_too_many(self):
+        body = self.CLAIM + '<svg viewBox="0 0 1 1"></svg>' * 3
+        self.assertIn((1, "figures"), rules(slide(body)))
+
+    def test_a_nested_svg_counts_once(self):
+        body = self.CLAIM + '<svg viewBox="0 0 2 2"><svg viewBox="0 0 1 1"></svg><svg viewBox="0 0 1 1"></svg></svg>'
+        self.assertEqual(rules(slide(body)), [])
+
+    def test_a_mark_is_not_a_figure(self):
+        body = self.CLAIM + '<ul class="ticks"><li>one</li></ul><span class="mark"><svg viewBox="0 0 1 1"></svg></span>'
+        self.assertIn((1, "list-no-evidence"), rules(slide(body)))
+
+    def test_only_the_stage_of_a_built_deck_is_read(self):
+        built = ('<html><body><main class="deck-stage" id="deckStage">' + slide(self.CLAIM + '<img src="a.png">')
+                 + "</main><script>/* one <section class='slide'><h2>Results</h2></section> per slide */</script></body></html>")
+        self.assertEqual(rules(lint.stage(built)), [])
+        self.assertEqual(lint.numbered(lint.stage(built)), 1)
+
+
 class Scope(unittest.TestCase):
     def test_backup_slides_are_skipped(self):
         html = slide("<h2>Keys</h2>", 'class="slide dark" data-slide="09" data-backup')

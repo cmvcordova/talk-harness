@@ -22,8 +22,10 @@ The rules, and where each comes from:
   list-no-evidence   the body is a bullet list with no figure, table or
                      number. A numbered list of questions (ol.asks), of
                      findings (ol.findings) or a ledger is evidence in itself.
-  figures            more than `max_figures` (2) figures or tables. One
-                     message per slide: Doumont; Naegle, PLoS Comput Biol 2021.
+  figures            more than `max_figures` (2) figures or tables: an img,
+                     a table, a live canvas or an inline svg. A mark or a
+                     logo is not a figure. One message per slide: Doumont;
+                     Naegle, PLoS Comput Biol 2021.
   pace               more than `slides_per_minute` (1.5) numbered slides for
                      each minute the outline sums to. A note, not a warning.
 
@@ -86,7 +88,8 @@ class _Slide(HTMLParser):
             self.has_chrome = True
         if "stat" in cls:
             self.has_number = True
-        figure = tag in ("img", "table") or (tag == "canvas" and "fig-full" not in cls)
+        figure = (tag in ("img", "table") or (tag == "canvas" and "fig-full" not in cls)
+                  or (tag == "svg" and not any(t == "svg" for t, _ in self.stack)))   # an inline drawing; a nested svg is part of it
         if figure and not self._inside(NOT_A_FIGURE) and not cls & NOT_A_FIGURE:
             self.figures += 1
         if tag in ("ul", "ol") and not cls & STRUCTURED and not self._inside(STRUCTURED):
@@ -114,7 +117,7 @@ class _Slide(HTMLParser):
             return
         if self._in_headline:
             self.headline += data
-        elif not self._inside(QUIET | STRUCTURED) and not any(t in ("script", "style", "table", "figure") for t, _ in self.stack):
+        elif not self._inside(QUIET | STRUCTURED) and not any(t in ("script", "style", "table", "figure", "svg") for t, _ in self.stack):
             self.body_words += len(data.split())      # a table, a figure and a structured list are evidence: not counted
 
 
@@ -124,7 +127,8 @@ def _attr(tag, name):
 
 
 def lint_slides(html, cfg=None):
-    """Problems for every numbered slide in `html` (the slides file or the built deck)."""
+    """Problems for every numbered slide in `html`: the slides file, or stage() of a built deck,
+    where the media and inline SVG tokens are already filled in."""
     cfg = {**DEFAULTS, **(cfg or {})}
     html = re.sub(r"<!--.*?-->", "", html, flags=re.S)
     out = []
@@ -156,6 +160,13 @@ def lint_slides(html, cfg=None):
             found.append(("figures", f'{s.figures} figures or tables (limit {cfg["max_figures"]}); one message per slide'))
         out += [Problem(n, rule, msg) for rule, msg in found if rule not in skip]
     return out
+
+
+def stage(built):
+    """The slides of a built deck: what is inside <main class="deck-stage">. The script and the
+    stylesheet of a built deck mention <section> too, and they are not slides."""
+    m = re.search(r'<main\b[^>]*class="deck-stage"[^>]*>(.*)</main>', built, flags=re.S)
+    return m.group(1) if m else built
 
 
 def numbered(html):
