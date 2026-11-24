@@ -25,9 +25,15 @@ screenshots and tell you what to change.
    reads a committed file and writes to `assets/`. A figure that explains an
    idea is a `<canvas data-viz>` in `_src/viz.js` or an SVG, and the slide
    says on its face that it is an illustration.
-6. Build, check, look, fix, export. The commands are below. Do not say the
-   deck is done until the check reports zero problems, you have opened every
-   screenshot and looked at it, and the PDF has one page per slide.
+6. Build, check, lint, look, fix, export. The commands are below. Do not say
+   the deck is done until the check reports zero problems, you have read
+   every line the lint prints and fixed it or can say why it stands, you
+   have opened every screenshot and looked at it, and the PDF has one page
+   per slide.
+
+If the folder has a `SKIN.md`, the talk wears a house skin. Read it before
+the first slide: it holds the layouts, the marks and the rules of that
+house, and it wins over the section "Layouts in the theme" below.
 
 ## Rules
 
@@ -42,6 +48,16 @@ Honesty:
 - A `<span class="ph">...</span>` marks anything still to write or draw. The
   build lists every one. Never present a deck with one in it.
 - Timing is summed from the outline by the build. Never estimate it.
+
+Evidence (the lint checks the first four):
+
+- A content slide's headline is a sentence that states what the slide
+  shows, two lines at most: `<h2 class="claim">`. "Results" is a topic.
+- Under it sits the evidence for that sentence: one figure, one table or
+  one number in `<div class="evidence">`. Not a list of points.
+- At most 45 words under the headline. The rest is said, and lives in the
+  outline's `Notes`.
+- The main message is on the first or second slide and again on the last.
 
 Audience:
 
@@ -75,12 +91,13 @@ Presenting:
 | `_src/slides.html` | the words and layout on screen |
 | `_src/viz.js` | live figures: `VIZ['name'] = canvas => ({printAt, reset, frame(t)})` |
 | `_src/deck.css` | the theme; tokens at the top are the whole re-skin |
+| `_src/skin.css`, `SKIN.md` | a house skin, if the talk was stamped with one; change it in the skin's own folder, then `deck.py reskin` |
 | `_src/build.py` | assembles the deck and enforces the rules above |
 | `_src/controller.js`, `_src/viewport-base.css` | the runtime; do not edit for a talk |
 | `sources/citations.json` | `{key: {label, url}}`; `data-cite="key"` on a section becomes footer links |
 | `assets/` | media, referenced as `__MEDIA_name.ext__` in slides |
 | `figures/` | scripts that draw data figures into `assets/` (create when needed) |
-| `tools/deck.py` | serve, screenshots, check, PDF |
+| `tools/deck.py` | serve, screenshots, check, lint, PDF |
 
 ## Commands
 
@@ -97,6 +114,13 @@ means problems:
 
 ```
 python3 tools/deck.py check
+```
+
+Name the slides that break the evidence rules (the rules and their sources
+are in `tools/lint.py`; `--strict` makes it exit 1):
+
+```
+python3 tools/deck.py lint
 ```
 
 Screenshot every slide to `shots/NN.png`, then open each one and look:
@@ -130,9 +154,12 @@ and close; nothing but the sentence). Chrome: `<div class="chrome"><span
 class="label">00 / 00</span></div>` on numbered slides; the build rewrites
 the number. Footer: `<div class="footband">`, with `<span class="cites">
 </span>` where citations should land. Type: `h1`, `h2`, `.lead`, `.body`,
-`.kicker`, `.label`, `.pull`, `.stat`, `em` for the accent colour. Blocks:
-`.row` + `.col`, `.cell`, `.info`, `ul.ticks`, `table`, `.plates`,
-`.fillbody`. Motion: `.reveal` on the children of a slide, `.r-late` and
+`.claim` (the sentence headline), `.kicker`, `.label`, `.pull`, `.stat`,
+`em` for the accent colour. Blocks: `.evidence` (a `figure` and an optional
+`.reading` column under a claim), `.row` + `.col`, `.cell`, `.info`,
+`ul.ticks`, `table`, `.plates`, `.fillbody`. Colours inside a slide come
+from the ground: use `var(--ink)`, `var(--ink-2)`, `var(--ink-3)`,
+`var(--bd)`, never the dark or cream tokens by name. Motion: `.reveal` on the children of a slide, `.r-late` and
 `.r-late2` to hold one back.
 
 The example deck in `_src/slides.html` uses every one of these. Replace it;

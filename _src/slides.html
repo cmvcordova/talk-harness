@@ -14,15 +14,16 @@
   <div style="position:absolute;left:var(--pad-x);right:var(--pad-x);top:300px;z-index:3">
     <div class="kicker reveal">talk-harness</div>
     <h1 class="reveal" style="margin-top:26px;max-width:1500px">A talk built with <em style="white-space:nowrap">talk-harness</em></h1>
-    <p class="lead reveal r-late" style="margin-top:40px;font-size:40px;color:var(--ink-cream-2);max-width:1300px">Eight slides that show every layout, and the rules the build enforces.</p>
+    <p class="lead reveal r-late" style="margin-top:40px;font-size:40px;color:var(--ink-2);max-width:1300px">Eight slides that show every layout, and the rules the build enforces.</p>
   </div>
   <div class="credit" style="position:absolute;left:var(--pad-x);bottom:66px;z-index:3">
     Your name &nbsp;&middot;&nbsp; Your lab &nbsp;&middot;&nbsp; Date
   </div>
 </section>
 
-<!-- 02 · TWO COLUMNS — dark ground, chrome band, ticks ──────────────────── -->
-<section class="slide dark" data-slide="02" data-cite="frontend-slides">
+<!-- 02 · TWO COLUMNS — dark ground, chrome band, ticks. A list with no figure:
+     `deck.py lint` names such a slide, and data-lint opts this one out. ──── -->
+<section class="slide dark" data-slide="02" data-cite="frontend-slides" data-lint="words list-no-evidence">
   <div class="chrome"><span class="label">00 / 00</span></div>
   <div class="head">
     <h2 class="reveal">What the build enforces</h2>
@@ -65,7 +66,7 @@
 <section class="slide cream" data-slide="04">
   <div class="chrome"><span class="label">00 / 00</span></div>
   <div class="head">
-    <h2 class="reveal">The outline fields</h2>
+    <h2 class="reveal">The outline holds five fields for each slide.</h2>
     <p class="lead reveal">One heading per slide in <code style="font-family:var(--f-mono);font-size:.8em">outline.md</code>, and up to five lines under it.</p>
   </div>
   <table class="reveal" style="margin-top:56px;font-size:26px">
@@ -87,8 +88,8 @@
   <div class="fillbody">
     <div class="kicker reveal">the stage</div>
     <div class="stat reveal" style="margin-top:18px;font-size:200px">1920 <span style="color:var(--accent)">&times;</span> 1080</div>
-    <p class="lead reveal" style="margin-top:22px;max-width:1300px;color:var(--ink-cream-2)">The whole stage scales to the screen as one unit. Nothing reflows, on a phone or a projector.</p>
-    <p class="caption reveal r-late" style="margin-top:34px;font-family:var(--f-mono);color:var(--ink-cream-3)">Source: _src/viewport-base.css, section 3. A number with a file is a fact; a number alone is a claim.</p>
+    <p class="lead reveal" style="margin-top:22px;max-width:1300px;color:var(--ink-2)">The whole stage scales to the screen as one unit. Nothing reflows, on a phone or a projector.</p>
+    <p class="caption reveal r-late" style="margin-top:34px;font-family:var(--f-mono);color:var(--ink-3)">Source: _src/viewport-base.css, section 3. A number with a file is a fact; a number alone is a claim.</p>
   </div>
   <div class="footband"><span>one number per slide, and where it came from</span><span class="cites"></span></div>
 </section>
@@ -101,7 +102,7 @@
   </div>
   <div class="row" style="margin-top:40px;align-items:flex-start">
     <figure class="reveal" style="flex:0 0 880px;margin:0">
-      <img src="__MEDIA_example-figure.svg__" width="880" height="560" style="display:block;border:1px solid var(--bd-dark)" alt="An illustration of a curve rising with depth">
+      <img src="__MEDIA_example-figure.svg__" width="880" height="560" style="display:block;border:1px solid var(--bd)" alt="An illustration of a curve rising with depth">
     </figure>
     <div class="col reveal r-late" style="padding-top:12px">
       <p class="lead">Media comes from <span style="font-family:var(--f-mono);font-size:.85em">assets/</span> through a token in the slide.</p>
@@ -119,7 +120,7 @@
 <section class="slide dark" data-slide="07">
   <div class="chrome"><span class="label">00 / 00</span></div>
   <div class="head">
-    <h2 class="reveal">Sources</h2>
+    <h2 class="reveal">Every source, and the slide it is on.</h2>
     <p class="lead reveal">Everything the deck cited, with the slide it appears on. The build writes this list.</p>
   </div>
   <div class="reveal" style="margin-top:48px;max-width:1500px">

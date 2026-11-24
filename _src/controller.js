@@ -198,6 +198,37 @@ class Deck {
         }
       }
     });
+    /* ?lint=<px>: the two evidence rules that depend on wrapping (tools/lint.py has the rest).
+       A headline over two lines, and running text under the minimum size. Backup slides,
+       slides with data-lint="off", and the bands, labels and figures are left out. */
+    const minPx = parseFloat(PARAMS.get('lint'));
+    if(minPx){
+      const quiet = '.chrome,.footband,.label,.kicker,.status,.credit,.wordmark,.lockup,.cite,.caption,.src,.ph,figure,table,svg,canvas,[data-nolint]';
+      this.slides.forEach((s, n) => {
+        const skip = (s.dataset.lint || '').split(/\s+/);
+        if(s.hasAttribute('data-backup') || skip.includes('off')) return;
+        this.show(n);
+        const nn = String(n+1).padStart(2,'0');
+        const head = s.querySelector('.chrome') && s.querySelector('.claim, h2, h1');
+        if(head && !skip.includes('headline-lines')){
+          const lines = Math.round(head.getBoundingClientRect().height / parseFloat(getComputedStyle(head).lineHeight));
+          if(lines > 2) console.log(`LINT slide ${nn}: headline-lines: the headline takes ${lines} lines (limit 2)`);
+        }
+        if(skip.includes('small-text')) return;
+        const seen = new Set();
+        const walk = document.createTreeWalker(s, NodeFilter.SHOW_TEXT);
+        for(let t = walk.nextNode(); t; t = walk.nextNode()){
+          /* an inline span of code inside a sentence is read at the sentence's size */
+          const el = t.parentElement.closest('p,li,h3,dd,dt,blockquote') || t.parentElement;
+          if(!t.textContent.trim() || t.parentElement.closest(quiet)) continue;
+          const px = parseFloat(getComputedStyle(el).fontSize);
+          if(px < minPx && !seen.has(px)){
+            seen.add(px);
+            console.log(`LINT slide ${nn}: small-text: running text at ${px}px (minimum ${minPx}): ${t.textContent.trim().slice(0, 40).replace(/"/g, "'")}`);
+          }
+        }
+      });
+    }
     console.log(`CHECK done: ${this.slides.length} slides, ${problems} problems`);
     this.show(0);
     return problems;
