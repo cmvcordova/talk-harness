@@ -13,7 +13,8 @@
    build read, or the visual is a schematic and its slide's footer says so.
 
    Helpers below: mkRnd (seeded random, so the picture is identical on
-   every load), gauss, smoothstep, rgba, ground, arrowHead, FONT.
+   every load), gauss, smoothstep, rgba, ground, arrowHead, FONT, and
+   local(cv) for the colours of the ground a canvas sits on.
    ========================================================================= */
 const VIZ = {};
 const REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -38,11 +39,22 @@ const hexToTriplet = h => { h = h.replace('#',''); if(h.length === 3) h = [...h]
   return [0,2,4].map(i => parseInt(h.slice(i,i+2),16)).join(','); };
 const C = {
   ground: css('--bg-dark')  || '#232E26',
-  void:   '#0A0F0C',
+  void:   css('--bg-void')  || '#0A0F0C',
+  voidT:  css('--void-rgb') || '10,15,12',
   paper:  hexToTriplet(css('--ink-cream') || '#F0E8D2'),
   ink:    hexToTriplet(css('--ink-dark')  || '#1E2820'),
   accent: hexToTriplet(css('--accent')    || '#D4843E')
 };
+/* The colours of the ground a canvas sits on. A visual that should work on
+   any ground (dark, cream, a skin's own) reads these instead of C:
+     const K = local(cv);  K.ink and K.accent are triplets, K.ground a colour. */
+function local(cv){
+  const cs = getComputedStyle(cv);
+  const hex = (name, fallback) => { const v = cs.getPropertyValue(name).trim();
+    return /^#[0-9a-f]{3,6}$/i.test(v) ? hexToTriplet(v) : fallback; };
+  return { ink: hex('--ink', C.paper), accent: hex('--accent', C.accent),
+           ground: cs.getPropertyValue('--ground').trim() || C.ground };
+}
 const FONT = {
   body:  s => s + 'px ' + (css('--f-body') || 'sans-serif'),
   bold:  s => '700 ' + s + 'px ' + (css('--f-display') || 'sans-serif'),
@@ -87,7 +99,7 @@ VIZ['drift'] = function(cv){
     frame(el){
       const t = REDUCE ? 6 : el;
       ctx.globalCompositeOperation = 'source-over';
-      ctx.fillStyle = 'rgba(10,15,12,0.06)'; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = rgba(C.voidT, .06); ctx.fillRect(0,0,W,H);
       ctx.globalCompositeOperation = 'lighter';
       for(let i=0;i<N;i++){
         let x = P[i*2], y = P[i*2+1];

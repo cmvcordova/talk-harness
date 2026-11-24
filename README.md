@@ -110,6 +110,52 @@ element that leaves the 1920×1080 stage, every text box that clips its own
 content, and every image that did not load. Exit code 1 means something to
 fix.
 
+`python3 tools/deck.py lint` names the slides that break the rules for
+slides with evidence behind them: a headline that is a topic and not a
+sentence, a headline over two lines, more than 45 words under it, a bullet
+list with no figure beside it, more than two figures, running text under
+24 px. Each rule and the study it comes from is in `tools/lint.py`. A slide
+opts out with `data-lint="off"`; the thresholds are set under `[lint]` in
+`deck.toml`.
+
+## Skins
+
+A skin puts a house style on a deck without touching the engine. It is a
+folder:
+
+```
+my-skin/
+  skin.toml     name, fonts (a Google Fonts URL, or "" for system fonts),
+                about (one line), home (the folder this house's talks live in)
+  skin.css      token overrides and brand rules; pasted after deck.css
+  assets/       marks and logos; copied into the talk's assets/
+  starter/      optional: slides.html, outline.md a new talk starts from
+  starters/x/   optional: named starters, chosen with --starter x
+  SKIN.md       optional: the house rules; copied into the talk
+```
+
+Stamp a talk with it, by path or by name:
+
+```
+python3 talk-harness/tools/deck.py new my-talk --skin path/to/my-skin --starter x
+```
+
+A name is looked up in `$TALK_SKINS`, then `~/.config/talk-harness/skins/`,
+then `talk-harness/skins/`. `deck.py skins` lists what it finds. After a
+skin changes, `deck.py reskin --skin NAME` in a talk folder copies the new
+stylesheet and assets in and leaves the slides alone.
+
+Every ground in the theme sets five local properties: `--ground`, `--ink`,
+`--ink-2`, `--ink-3`, `--bd`. Components read only those. So a skin adds a
+ground in one rule:
+
+```css
+.slide.sand{--ground:#d8c9a8;--ink:#1f1b16;--ink-2:#4a443b;--ink-3:rgba(31,27,22,.62);--bd:#b9a57e}
+```
+
+`__INLINE_name.svg__` in a slide pastes an SVG from `assets/` into the
+page, so a mark drawn with `currentColor` takes the colour of its place.
+
 ## The example deck
 
 The repo root is itself a working talk: eight slides that use every layout

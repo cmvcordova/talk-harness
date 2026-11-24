@@ -27,6 +27,22 @@ not replace the folder's `CLAUDE.md`: read that next and follow it.
    python3 ~/code/talk-harness/tools/deck.py new <parent>/YYYY-MM-DD-venue-slug
    ```
 
+   If the talk belongs to a house (a company, a lab, a project with its own
+   look), stamp it with that house's skin. List the skins on this machine;
+   each one names its starters and the folder its talks live in:
+
+   ```
+   python3 ~/code/talk-harness/tools/deck.py skins
+   ```
+
+   Then stamp inside that folder, with the starter that fits the room:
+
+   ```
+   python3 ~/code/talk-harness/tools/deck.py new <skin's home>/YYYY-MM-DD-venue-slug --skin <name> --starter <starter>
+   ```
+
+   A talk with no house goes next to the user's other talks, with no skin.
+
    Never copy `_src/` from an older deck. The stamped folder has the whole
    system and no content: a one-slide `outline.md` and `slides.html` to
    replace, an empty `sources/citations.json`, an empty `assets/`. The
@@ -65,6 +81,8 @@ fix made only inside a talk folder is lost for the next one.
 
 | Mistake | Instead |
 |---|---|
+| Paste brand colours into `_src/deck.css` of one talk | a skin folder, `--skin`, and `reskin` when it changes |
+| Skip `deck.py lint` because the check passed | the check finds overflow; the lint finds slides with no claim or no evidence |
 | Copy `build.py`, `deck.css`, `controller.js` from the last deck and patch `OUT` by hand | `deck.py new`, then edit `deck.toml` |
 | Build slides from the frontend-slides skill's template | the stamped `_src/slides.html`; the theme and runtime are already there |
 | Ask a dozen questions in your own words | the brief's blank questions, in one message |

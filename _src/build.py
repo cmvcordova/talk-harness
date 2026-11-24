@@ -6,12 +6,16 @@
 
 Reads deck.toml, outline.md and _src/{deck.css,viewport-base.css,
 controller.js,viz.js,slides.html}; writes the file deck.toml names.
+If _src/skin.css exists it is pasted after deck.css: a skin overrides the
+theme's tokens and adds its own rules (tools/deck.py new --skin).
 
 What it enforces, every build:
   - slide numbers come from document order; data-backup slides are "Backup"
   - speaker notes come from outline.md, matched by data-slide="NN"
   - every <span class="ph"> placeholder is listed
   - media tokens __MEDIA_name.ext__ are resolved, and missing files listed
+  - __INLINE_name.svg__ pastes an SVG from the media folder into the slide,
+    so a mark can take its colour from the text around it (currentColor)
   - data-cite keys become footer links from sources/citations.json, and
     __SOURCES_LIST__ becomes the list of every source used
   - the talk time is summed from the outline's Time lines, never estimated
@@ -86,6 +90,9 @@ def build(root, embed=False):
 
     viewport = (src / "viewport-base.css").read_text()
     css = (src / "deck.css").read_text().replace("__VIEWPORT_BASE__", viewport.strip())
+    if (src / "skin.css").exists():
+        css += "\n/* --- skin: _src/skin.css --- */\n" + (src / "skin.css").read_text()
+        say(f"skin: {cfg.get('skin', 'unnamed')} (_src/skin.css)")
     slides = (src / "slides.html").read_text()
     viz = (src / "viz.js").read_text()
     ctl = (src / "controller.js").read_text()
@@ -109,6 +116,23 @@ def build(root, embed=False):
         rep.problems += len(missing)
         say("MISSING MEDIA (the slide will show a broken asset): " + ", ".join(f"{media_dir.name}/{m}" for m in missing))
     say("media: " + ("embedded" if embed else f"linked from {media_dir.name}/"))
+
+    # --- inline SVG: the file's markup goes into the slide ------------------
+    gone = []
+
+    def inline(m):
+        p = media_dir / m.group(1)
+        if not p.exists():
+            gone.append(m.group(1))
+            return ""
+        svg = p.read_text()
+        svg = re.sub(r"<\?xml.*?\?>|<!DOCTYPE.*?>|<!--.*?-->", "", svg, flags=re.S)
+        return svg.strip()
+
+    slides = re.sub(r"__INLINE_([A-Za-z0-9_.-]+\.svg)__", inline, slides)
+    if gone:
+        rep.problems += len(gone)
+        say("MISSING INLINE SVG (nothing is drawn): " + ", ".join(f"{media_dir.name}/{g}" for g in sorted(set(gone))))
 
     # --- citations: data-cite keys -> footer links; __SOURCES_LIST__ -------
     cpath = root / "sources" / "citations.json"
@@ -222,6 +246,10 @@ def build(root, embed=False):
 
     # --- assemble ------------------------------------------------------------
     deck_id = pathlib.Path(cfg["output"]).stem
+    # an empty `fonts` in deck.toml means system fonts and no network
+    fonts = (f'<link rel="preconnect" href="https://fonts.googleapis.com">\n'
+             f'<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
+             f'<link rel="stylesheet" href="{cfg["fonts"]}">\n') if cfg.get("fonts") else ""
     ctl = ctl.replace("__DECK_ID__", deck_id)
     rep.html = f"""<!DOCTYPE html>
 <html lang="{cfg.get('lang', 'en')}">
@@ -229,10 +257,7 @@ def build(root, embed=False):
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{_html.escape(cfg['title'])}</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="{cfg['fonts']}">
-<style>
+{fonts}<style>
 {css}
 </style>
 </head>
